@@ -1,1 +1,4 @@
-# JS - Tetris
+# JS
+
+JavaScript --- Tetris
+
