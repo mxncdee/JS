@@ -1,182 +1,336 @@
-import Matrix from './matrix.js'
 
-console.log("TETRIS.JS LOADED");
+// set le costanti rows,columns, speed
+const BOARD_ROWS = 20
+const BOARD_COLUMNS = 10
+const SIDEBOARD_ROWS = 4
+const SIDEBOARD_COLUMNS = 5
+const SQUARE = 20   //zoom
+const VACANT = 'white' //sfondo bianco
+const BORDER = '#43464B' //Bordo
+const START_SPEED = 100
+const SPEED_DECREMENT = 100
 
-const screen = document.getElementById('screen');
-const ctx = screen.getContext('2d');
+const canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE)
+const bodyElement = document.querySelector('body')
+const scoreElement = document.querySelector('#score')
+const levelElement = document.querySelector('#level')
+const gameoverElement = document.querySelector('#gameover')
+const newGameButton = gameoverElement.querySelector('button')
+const ctx = canvas.getContext('2d')
 
-const COLOR1='#00AA8D';
-const COLOR2='#00BF9A';
-const SCALE_F= 20;
+document.addEventListener('keydown', handleInput)
+newGameButton.addEventListener('click', handleNewGame)
 
+function handleInput (event) {
+  // console.log(event) //iterecettare i tasti
+  if(!gameOver) {
+    if (event.keyCode == 37) {
+      p.moveLeft()
+      dropStart = Date.now()
+    } else if (event.keyCode == 38) {
+      p.rotate()
+      dropStart = Date.now()
+    } else if (event.keyCode == 39) {
+      p.moveRight()
+      dropStart = Date.now()
+    } else if (event.keyCode == 40) {
+      p.moveDown()
+    }
+  }
+}
 
-//console.log(SCALE_F);
+function handleNewGame () {
+  runTime = Date.now()
+  difficulty = START_SPEED
+  score = 0
+  gameOver = false
+  emptyBoard()
+  drawBoard()
+  drawSideBoard()
+  
+  p = randomPiece()
+  nextPiece = randomPiece()
+  nextPiece.draw()
 
+  scoreElement.innerHTML = score
+  gameoverElement.classList.add('hide')
+  bodyElement.className = ''
+  drop()
+}
 
-class Tetromino {
-    constructor() {
+// per ogni pezzo set un colore e il pezzo da usare
+const pieces = [
+  [Z, '#73956F'],
+  [S, '#00ff00'],
+  [T, '#2E5EAA'],
+  [O, '#8F6593'],
+  [L, '#3D2B56'],
+  [I, '#D72638'],
+  [J, '#FE7F2D'],
+  [C, '#ccaacc']
+]
 
-        this.elements=new Matrix(4,4);
-        this.elements.set(1,0,1);
-        this.elements.set(1,1,0);
-        this.elements.set(1,1,1);
-        this.elements.set(1,2,1);
-        this.pos ={
-            x:10,
-            y:5
+let nextPiece
+let p
+let difficulty
+let runTime
+
+let score = 0
+let board = []
+emptyBoard()
+
+function emptyBoard () {
+  for (row = 0; row < BOARD_ROWS; row++) {
+    board[row] = []
+    for (col = 0; col < BOARD_COLUMNS; col++) {
+      board[row][col] = VACANT
+    }
+  }
+}
+
+function init (rows, cols, square) {
+  const canvas = document.querySelector('#tetris')
+
+  canvas.width = (cols * square) + (SIDEBOARD_COLUMNS + 2) * square
+  canvas.height = rows * square
+
+  return canvas
+}
+
+// set speed e aumento la difficoltà
+function adjustDifficulty (runTime) {
+  if (runTime <= 10000) { return START_SPEED }
+  if (runTime > 10000 && runTime <= 20000) { return START_SPEED - SPEED_DECREMENT }
+  else if (runTime > 20000 && runTime <= 30000) { return START_SPEED - 2*SPEED_DECREMENT }
+  else if (runTime > 30000 && runTime <= 40000) { return START_SPEED - 3*SPEED_DECREMENT }
+  else if (runTime > 40000 && runTime <= 50000) { return START_SPEED - 4*SPEED_DECREMENT }
+  else if (runTime > 50000 && runTime <= 60000) { return START_SPEED - 5*SPEED_DECREMENT }
+  else if (runTime > 60000 && runTime <= 70000) { return START_SPEED - 6*SPEED_DECREMENT }
+  else if (runTime > 70000 && runTime <= 80000) { return START_SPEED - 7*SPEED_DECREMENT }
+  else if (runTime > 80000 && runTime <= 100000) { return START_SPEED - 8*SPEED_DECREMENT }
+  else if (runTime > 100000 && runTime <= 110000) { return START_SPEED - 9*SPEED_DECREMENT }
+  else if (runTime >= 110000) { return difficulty }
+}
+
+function drawSquare (x, y, color) {
+  ctx.fillStyle = color
+  ctx.fillRect(x*SQUARE, y*SQUARE, SQUARE, SQUARE)
+  ctx.strokeStyle = BORDER
+  ctx.strokeRect(x*SQUARE, y*SQUARE, SQUARE, SQUARE)
+}
+
+function drawBoard () {
+  for (row = 0; row < BOARD_ROWS; row++) {
+    for (col = 0; col < BOARD_COLUMNS; col++) {
+      drawSquare(col, row, board[row][col])
+    }
+  }
+}
+
+//sideboard con offset, offset +2 del tetris
+function drawSideBoard () {
+  const offset = 2
+  for (row = 0; row < (SIDEBOARD_ROWS); row++) {
+    for (col = BOARD_COLUMNS+offset; col < (BOARD_COLUMNS+SIDEBOARD_COLUMNS+offset); col++) {
+      drawSquare(col, row, VACANT)
+    }
+  }
+}
+
+drawBoard()
+drawSideBoard()
+
+//genero i pezzi casuli
+function randomPiece () {
+  let random = Math.floor(Math.random() * pieces.length)
+  return new Piece(pieces[random][0], pieces[random][1]) 
+}
+
+// il pezzo con colore
+function Piece (tetromino, color) {
+  this.tetromino = tetromino
+  this.color = color
+
+  this.tetrominoIndex = 0
+  this.activeTetromino = this.tetromino[this.tetrominoIndex]
+  // pezzo nel sideboard centrato
+  this.x = 13
+  this.y = 1
+
+  if (this.activeTetromino[0].length > 3) {
+    this.x = 12
+    this.y = 0
+  }
+  
+}
+
+Piece.prototype.fill = function (color) {
+  for (row = 0; row < this.activeTetromino.length; row++) {
+    for (col = 0; col < this.activeTetromino.length; col++) {
+      if (this.activeTetromino[row][col]) {
+        drawSquare(this.x + col, this.y + row, color)
+      }
+    }
+  }
+}
+
+Piece.prototype.draw = function () {
+  this.fill(this.color)
+}
+
+Piece.prototype.clear = function () {
+  this.fill(VACANT)
+}
+
+Piece.prototype.moveDown = function () {
+  console.log(this.x,this.y)
+  if (!this.collision(0, 1, this.activeTetromino)) {
+    this.clear()
+    this.y++
+    this.draw()
+  } else {
+    // lock piece and make new piece
+    this.lock()
+    p = nextPiece
+    p.x = 3
+    p.y = -2
+    
+    if (!gameOver) {
+      nextPiece = randomPiece()
+      nextPiece.draw()
+
+      difficulty = adjustDifficulty(Date.now() - runTime)
+      const level = (START_SPEED - difficulty) / 100
+      levelElement.innerHTML = level
+      bodyElement.classList.add('level-${level}')
+      bodyElement.classList.remove('level-${level-1}')
+    }
+  }
+}
+
+//move dx
+Piece.prototype.moveRight = function () {
+  if (!this.collision(1, 0, this.activeTetromino)) {
+    this.clear()
+    this.x++
+    this.draw()
+  }
+}
+
+//move sx
+Piece.prototype.moveLeft = function () {
+  if (!this.collision(-1, 0, this.activeTetromino)) {
+    this.clear()
+    this.x--
+    this.draw()
+  }
+}
+
+//ruoto il tetroM
+Piece.prototype.rotate = function () {
+  let nextIndex = (this.tetrominoIndex + 1) %this.tetromino.length
+  let nextPattern = this.tetromino[nextIndex]
+  let kick = 0
+
+  if (this.collision(0, 0, nextPattern)) {
+    if (this.x > BOARD_COLUMNS / 2) {
+      kick = -1
+    } else {
+      kick = 1
+    }
+  }
+
+  if (!this.collision(kick, 0, nextPattern)) {
+    this.clear()
+    this.x += kick
+    this.tetrominoIndex = nextIndex
+    this.activeTetromino = this.tetromino[this.tetrominoIndex]
+    this.draw()
+  }  
+}
+
+Piece.prototype.lock = function () {
+  for (row = 0; row < this.activeTetromino.length; row++) {
+    for (col = 0; col < this.activeTetromino.length; col++) {
+      if (!this.activeTetromino[row][col]) {
+        continue
+      }
+
+      if (this.y + row < 0) {
+        gameoverElement.classList.remove('hide')
+        gameOver = true
+        break
+      }
+
+      board[this.y + row][this.x + col] = this.color
+    }
+  }
+
+  for (row = 0; row < BOARD_ROWS; row++) {
+    let isRowFull = true
+    for (col = 0; col < BOARD_COLUMNS; col++) {
+      isRowFull = isRowFull && (board[row][col] != VACANT)
+    }
+    if (isRowFull) {
+      for (y = row; y > 1; y--) {
+        for (col = 0; col < BOARD_COLUMNS; col++) {
+          board[y][col] = board[y-1][col]
         }
-        this.color='red'
+      }
+
+      for (col = 0; col < BOARD_COLUMNS; col++) {
+        board[0][col] = VACANT
+      }
+
+      score += 10
     }
-
-    collideBoarders(cols){
-        let collide = false;
-        this.elements.forEach((v,x,y) => {
-            if ((v !== 0) && 
-                x+this.pos.x < 0 || 
-                y+this.pos.x > cols){
-                collide= true;
-                return
-                }
-        })
-        return collide;
-    }
-
-    collideBottom(rows) {
-        let collide = false;
-        this.elements.forEach((v,x,y) => {
-            if (v !== 0 &&               
-                y+this.pos.y >= rows){
-                collide= true;
-                return
-                }
-        })
-        return collide;
-
-    }
-
-
-draw(ctx) {
-    ctx.fillStyle=this.color;
-    this.elements.forEach((v,x,y) => {
-       // console.log(v,x,y);
-        if(v !== 0){
-            ctx.fillRect(x+this.pos.x,y+this.pos.y,1,1);
-        }
-    });
-}
+  }
+  drawBoard()
+  drawSideBoard()
+  scoreElement.innerHTML = score
 }
 
-let t = new Tetromino();
+// gestisco la collisione
+Piece.prototype.collision = function (x, y, piece) {
+  for (row = 0; row < piece.length; row++) {
+    for (col = 0; col < piece.length; col++) {
+      if (!piece[row][col]) {
+        continue
+      }
+      
+      let futureX = this.x + col + x
+      let futureY = this.y + row + y
 
+      if (futureX < 0 || futureX >= BOARD_COLUMNS || futureY >= BOARD_ROWS) {
+        return true
+      }
 
-ctx.scale(SCALE_F, SCALE_F);
+      if (futureY < 0) {
+        continue
+      }
 
-function drawGameBoard(){
-
-
-    // disegna le righe verdi
-    for (let i = 0; i < screen.width/SCALE_F ; i++){
-        // zona di gioco righe pari e dispari
-        ctx.fillStyle = i % 2 === 0 ? COLOR1 : COLOR2;
-        ctx.fillRect(i , 0, 1, screen.height/SCALE_F);
-        //console.log(i);
+      if (board[futureY][futureX] != VACANT) {
+        return true
+      }
     }
-
+  }
+  return false
 }
 
-/*  ctx.fillStyle = 'green'; BLOCCO VERDE
-    ctx.fillRect(5, 5, 1, 1);
-*/
+let dropStart = Date.now()
+let gameOver = true
 
-window.addEventListener('keyup', (event) => {
-    console.log("UP", event.key)
-})
+function drop () {
+  let now = Date.now()
+  let delta = now - dropStart
 
-window.addEventListener('keydown', (event) => {
-    const {key} = event;
-    // direzione in cui sto andando
-    let direction =0;
-    if (key === 'ArrowLeft'){
-        direction = -1;
-        } else if (key === 'ArrowRight'){
-            direction = 1;
-        }
-        t.pos.x +=direction;
-    //console.log(t.collideBoarders(screen.width(SCALE_F)))
-    if (t.collideBoarders(screen.width / SCALE_F) && direction !== 0){
-        console.log('COLLIDE')
-        t.pos.x -= direction;
-    }
-
-       
-    // non fa update verifica
-    console.table(t.pos)
-})
-
-let lastTime=0;
-//1 secondo per scendere, da usare per aumentare la difficoltà
-let dropInterval = 1000; 
-let lastDropDt=0;
-
-function DropUpdate(dt){
-    if (t.collideBottom(screen.height/SCALE_F)){
-        t.pos.y=0;
-    }
+  if (delta > difficulty) {
+    p.moveDown()
+    dropStart = Date.now()
+  }
+  
+  if (!gameOver) {
+    requestAnimationFrame(drop)
+  }
 }
 
-function update(time=0) {
-    let dt= (time-lastTime);
-    DropUpdate(dt);
-    lastDropDt +=dt;
-    if (lastDropDt > dropInterval){
-        t.pos.y++;
-        lastDropDt=0;
-    }
-
-    drawGameBoard();
-    t.draw(ctx);
-   //console.log(dt)
-    lastTime=time;
-    requestAnimationFrame(update);
-
-}
-
-update();
-
-
-// elementi del tetris una matrice 4x4 (abbiamo 7 pezzi in totale)
-
-/*
-function forEachElement(el,cb){
-    return () => {
-        el.forEach((row,y) => {
-            row.forEach((v,x)=> {
-                cb(v,x,y);
-            })
-        })
-    }
-
-}
-
-function drawElement2(el) {
-    forEachElement(el,(v,x,y) => {
-        // elementi disegnati 
-        // console.log(v,x,y)
-             if (v!==0){
-                ctx.fillRect(x,y,1,1)
-            }
-        }); 
-    }
-*/
-
-function drawElement(el){
-    el.forEach((row,y)=> {
-        row.forEach((v,x) => {
-             if (v!==0){
-                ctx.fillRect(x,y,1,1)
-            }
-        }); 
-    });
-}
-
-//drawElement2(element);
