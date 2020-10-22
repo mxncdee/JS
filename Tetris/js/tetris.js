@@ -1,5 +1,5 @@
 
-// set le costanti rows,columns, speed
+// seti rows,columns, speed
 const BOARD_ROWS = 20
 const BOARD_COLUMNS = 10
 const SIDEBOARD_ROWS = 4
@@ -7,7 +7,7 @@ const SIDEBOARD_COLUMNS = 5
 const SQUARE = 20   //zoom
 const VACANT = 'white' //sfondo bianco
 const BORDER = '#43464B' //Bordo
-const START_SPEED = 100
+const START_SPEED = 1000
 const SPEED_DECREMENT = 100
 
 const canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE)
@@ -90,10 +90,9 @@ function emptyBoard () {
 
 function init (rows, cols, square) {
   const canvas = document.querySelector('#tetris')
-
+  //disegno l'area di gioco
   canvas.width = (cols * square) + (SIDEBOARD_COLUMNS + 2) * square
   canvas.height = rows * square
-
   return canvas
 }
 
@@ -189,7 +188,7 @@ Piece.prototype.moveDown = function () {
     this.y++
     this.draw()
   } else {
-    // lock piece and make new piece
+    // blocco il pezzo e creo un nuovo pezzo
     this.lock()
     p = nextPiece
     p.x = 3
@@ -330,7 +329,7 @@ function drop () {
   }
   
   if (!gameOver) {
-    requestAnimationFrame(drop)
+    window.requestAnimationFrame(drop)
   }
 }
 
