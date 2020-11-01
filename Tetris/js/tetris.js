@@ -7,8 +7,8 @@ const SIDEBOARD_COLUMNS = 5
 const SQUARE = 20   //zoom
 const VACANT = 'white' //sfondo bianco
 const BORDER = '#43464B' //Bordo
-const START_SPEED = 1000
-const SPEED_DECREMENT = 100
+const START_SPEED = 10
+const SPEED_DECREMENT = 1000
 
 const canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE)
 const bodyElement = document.querySelector('body')
