@@ -1,5 +1,5 @@
 
-// seti rows,columns, speed
+// set rows,columns, speed
 const BOARD_ROWS = 20
 const BOARD_COLUMNS = 10
 const SIDEBOARD_ROWS = 4
@@ -7,8 +7,8 @@ const SIDEBOARD_COLUMNS = 5
 const SQUARE = 20   //zoom
 const VACANT = 'white' //sfondo bianco
 const BORDER = '#43464B' //Bordo
-const START_SPEED = 1000
-const SPEED_DECREMENT = 100
+const START_SPEED = 10
+const SPEED_DECREMENT = 1000
 
 const canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE)
 const bodyElement = document.querySelector('body')
@@ -67,7 +67,7 @@ const pieces = [
   [L, '#3D2B56'],
   [I, '#D72638'],
   [J, '#FE7F2D'],
-  [C, '#ccaacc']
+  [C, '#CCAACC']
 ]
 
 let nextPiece
@@ -182,7 +182,7 @@ Piece.prototype.clear = function () {
 }
 
 Piece.prototype.moveDown = function () {
-  console.log(this.x,this.y)
+ // console.log(this.x,this.y) //pezzo che cade,  matrice delle coordinate nel tavolo
   if (!this.collision(0, 1, this.activeTetromino)) {
     this.clear()
     this.y++
