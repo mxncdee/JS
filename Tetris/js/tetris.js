@@ -191,8 +191,8 @@ Piece.prototype.moveDown = function() {
             difficulty = adjustDifficulty(Date.now() - runTime)
             const level = (START_SPEED - difficulty) / 100
             levelElement.innerHTML = level
-            bodyElement.classList.add('level-${level}')
-            bodyElement.classList.remove('level-${level-1}')
+            bodyElement.classList.add('.level-${level}')
+            bodyElement.classList.remove('.level-${level-1}')
         }
     }
 }
@@ -319,6 +319,6 @@ function drop() {
     }
 
     if (!gameOver) {
-        window.requestAnimationFrame(drop)
+        window.requestAnimationFrame(drop) //richiamato e agg. l'animazione prima che il browser esegua il render.
     }
 }
