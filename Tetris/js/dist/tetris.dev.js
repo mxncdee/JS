@@ -11,8 +11,8 @@ var VACANT = 'white'; //sfondo bianco
 
 var BORDER = '#43464B'; //Bordo
 
-var START_SPEED = 1000;
-var SPEED_DECREMENT = 100;
+var START_SPEED = 10;
+var SPEED_DECREMENT = 1000;
 var canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE);
 var bodyElement = document.querySelector('body');
 var scoreElement = document.querySelector('#score');
