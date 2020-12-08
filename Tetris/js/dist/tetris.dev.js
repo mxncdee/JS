@@ -11,8 +11,8 @@ var VACANT = 'white'; //sfondo bianco
 
 var BORDER = '#43464B'; //Bordo
 
-var START_SPEED = 10;
-var SPEED_DECREMENT = 1000;
+var START_SPEED = 1000;
+var SPEED_DECREMENT = 100;
 var canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE);
 var bodyElement = document.querySelector('body');
 var scoreElement = document.querySelector('#score');
@@ -201,9 +201,10 @@ Piece.prototype.moveDown = function () {
       nextPiece.draw();
       difficulty = adjustDifficulty(Date.now() - runTime);
       var level = (START_SPEED - difficulty) / 100;
-      levelElement.innerHTML = level;
-      bodyElement.classList.add('.level-${level}');
-      bodyElement.classList.remove('.level-${level-1}');
+      levelElement.innerHTML = level; //          console.log(levelElement.innerHTML)
+
+      bodyElement.classList.add('level-' + level);
+      bodyElement.classList.remove('level-' + (level - 1));
     }
   }
 }; //move dx

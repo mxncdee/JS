@@ -6,8 +6,8 @@ const SIDEBOARD_COLUMNS = 5
 const SQUARE = 20 //zoom
 const VACANT = 'white' //sfondo bianco
 const BORDER = '#43464B' //Bordo
-const START_SPEED = 10
-const SPEED_DECREMENT = 1000
+const START_SPEED = 1000
+const SPEED_DECREMENT = 100
 
 const canvas = init(BOARD_ROWS, BOARD_COLUMNS, SQUARE)
 const bodyElement = document.querySelector('body')
@@ -191,8 +191,9 @@ Piece.prototype.moveDown = function() {
             difficulty = adjustDifficulty(Date.now() - runTime)
             const level = (START_SPEED - difficulty) / 100
             levelElement.innerHTML = level
-            bodyElement.classList.add('.level-${level}')
-            bodyElement.classList.remove('.level-${level-1}')
+                //          console.log(levelElement.innerHTML)
+            bodyElement.classList.add('level-' + level)
+            bodyElement.classList.remove('level-' + (level - 1))
         }
     }
 }
